@@ -124,7 +124,7 @@ void DrawRoom( void );
 void DrawTeapot( void );
 void DrawSphere( void );
 void DrawTable( void );
-
+void DrawCustomObject(void);
 
 
 
@@ -181,6 +181,7 @@ void MakeReflectionImage( void )
 	DrawRoom();
 	DrawTeapot();
 	DrawSphere();
+	DrawCustomObject();
 
 	// STEP 6: Read the correct color buffer into the correct texture object.
 	glReadBuffer(GL_BACK);
@@ -231,6 +232,7 @@ void MyDisplay( void )
     DrawRoom();
     DrawTeapot();
     DrawSphere();
+	DrawCustomObject();
     DrawTable();
 
     glutSwapBuffers();
@@ -1039,4 +1041,83 @@ void DrawTable( void )
     glTranslated( 0.0, 0.0, 0.5 );
     glutSolidCube( 1.0 );
     glPopMatrix();
+}
+
+/////////////////////////////////////////////////////////////////////////////
+// Draw a texture-mapped teapot.
+/////////////////////////////////////////////////////////////////////////////
+
+void DrawCustomObject(void)
+{
+	float x = 0.3;
+	float y = 0.2;
+	float z = 0.5;
+	// glBindTexture(GL_TEXTURE_2D, reflectionTexObj);
+
+	//glNormal3f(0.0, 0.0, 1.0); // Normal vector.
+
+	// Should be anti-clockwise order! (opposite order of bottom-table)
+
+
+	// Sides.
+
+	GLfloat matAmbient2[] = { 0.5, 0.1, 0.4, 1.0 };
+	GLfloat matDiffuse2[] = { 0.2, 0.1, 0.4, 1.0 };
+	GLfloat matSpecular2[] = { 0.6, 0.3, 0.5, 1.0 };
+	GLfloat matShininess2[] = { 256.0 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, matAmbient2);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, matDiffuse2);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular2);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShininess2);
+
+	glBindTexture(GL_TEXTURE_2D, 0); // Texture object ID == 0 means no texture mapping.
+
+
+	glPushMatrix();
+	glTranslated(0.6, -0.9,  0);
+	glRotated(45.0, 0.0, 0.0, 1.0);
+	
+	// In +y direction.
+	glNormal3f(0.0, 1.0, 0.0); // Normal vector.
+	SubdivideAndDrawQuad(24, 2, 
+		0.0, 0.0, x, -y, TABLETOP_Z + z,
+		1.0, 0.0, -x, -y, TABLETOP_Z + z,
+		1.0, 1.0, -x, -y, TABLETOP_Z,
+		0.0, 1.0, x, -y, TABLETOP_Z);
+	// In -y direction.
+	glNormal3f(0.0, -1.0, 0.0); // Normal vector.
+	SubdivideAndDrawQuad(24, 2, 
+		0.0, 0.0, -x, y, TABLETOP_Z + z,
+		1.0, 0.0, x, y, TABLETOP_Z + z,
+		1.0, 1.0, x, y, TABLETOP_Z,
+		0.0, 1.0, -x, y, TABLETOP_Z);
+	// In +x direction.
+	glNormal3f(1.0, 0.0, 0.0); // Normal vector.
+	SubdivideAndDrawQuad(24, 2,
+		0.0, 0.0, x, -y, TABLETOP_Z,
+		1.0, 0.0, x, y, TABLETOP_Z,
+		1.0, 1.0, x, y, TABLETOP_Z + z,
+		0.0, 0.0, x, -y, TABLETOP_Z + z);
+
+	// In -x direction.
+	glNormal3f(-1.0, 0.0, 0.0); // Normal vector.
+	SubdivideAndDrawQuad(24, 2,
+		0.0, 0.0, -x, y, TABLETOP_Z,
+		1.0, 0.0, -x, -y, TABLETOP_Z,
+		1.0, 1.0, -x, -y, TABLETOP_Z + z,
+		0.0, 0.0, -x, y, TABLETOP_Z + z);
+
+
+	// Top.
+
+	glNormal3f(0.0, 0.0, -1.0); // Normal vector.
+	SubdivideAndDrawQuad(24, 24, 
+		0.0, 1.0, x, -y, TABLETOP_Z + z,
+		1.0, 0.0, x, y, TABLETOP_Z + z,
+		1.0, 1.0, -x, y, TABLETOP_Z + z,
+		0.0, 0.0, -x, -y, TABLETOP_Z + z
+		);
+
+	glPopMatrix();
+
 }
