@@ -78,7 +78,7 @@ const char ceilingTexFile[] = "images/ceiling.jpg";
 const char brickTexFile[] = "images/brick.jpg";
 const char checkerTexFile[] = "images/checker.png";
 const char spotsTexFile[] = "images/spots.png";
-
+const char paperTexFile[] = "images/paper.jpg";
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -111,6 +111,7 @@ GLuint ceilingTexObj;
 GLuint brickTexObj;
 GLuint checkerTexObj;
 GLuint spotsTexObj;
+GLuint paperTexObj;
 
 // Others.
 bool drawAxes = true;           // Draw world coordinate frame axes iff true.
@@ -576,6 +577,36 @@ void SetUpTextureMaps( void )
 	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); //Sets the automatic mipmap generation parameter to true
 
 	DeallocateImageData(&imageData);
+
+	
+	// This texture object is for the custom paper texture map.
+
+	glGenTextures(1, &paperTexObj);
+	glBindTexture(GL_TEXTURE_2D, paperTexObj);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+
+	if (ReadImageFile(paperTexFile, &imageData,
+		&imageWidth, &imageHeight, &numComponents) == 0) exit(1);
+	if (numComponents != 3)
+	{
+		fprintf(stderr, "Error: Texture image is not in RGB format.\n");
+		exit(1);
+	}
+
+	gluBuild2DMipmaps(GL_TEXTURE_2D, GL_RGB, imageWidth, imageHeight,
+		GL_RGB, GL_UNSIGNED_BYTE, imageData);
+
+	glBegin(GL_QUADS);
+
+	glEnd();
+
+	DeallocateImageData(&imageData);
+
+	
 }
 
 
@@ -833,7 +864,7 @@ void DrawRoom( void )
     glMaterialfv( GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular2 );
     glMaterialfv( GL_FRONT_AND_BACK, GL_SHININESS, matShininess2 );
 
-    glBindTexture( GL_TEXTURE_2D, 00000 );
+    glBindTexture( GL_TEXTURE_2D, checkerTexObj );
     glNormal3f( 0.0, 0.0, 1.0 ); // Normal vector.
     SubdivideAndDrawQuad( 24, 24, 0.0, 0.0, ROOM_HALF_WIDTH, -ROOM_HALF_WIDTH, 0.0, 
                                   ROOM_WIDTH, 0.0, ROOM_HALF_WIDTH, ROOM_HALF_WIDTH, 0.0, 
@@ -1044,56 +1075,51 @@ void DrawTable( void )
 }
 
 /////////////////////////////////////////////////////////////////////////////
-// Draw a texture-mapped teapot.
+// Draw a texture-mapped cube.
 /////////////////////////////////////////////////////////////////////////////
 
 void DrawCustomObject(void)
 {
 	float x = 0.3;
-	float y = 0.2;
+	float y = 0.3;
 	float z = 0.5;
-	// glBindTexture(GL_TEXTURE_2D, reflectionTexObj);
-
-	//glNormal3f(0.0, 0.0, 1.0); // Normal vector.
-
-	// Should be anti-clockwise order! (opposite order of bottom-table)
-
 
 	// Sides.
 
-	GLfloat matAmbient2[] = { 0.5, 0.1, 0.4, 1.0 };
-	GLfloat matDiffuse2[] = { 0.2, 0.1, 0.4, 1.0 };
-	GLfloat matSpecular2[] = { 0.6, 0.3, 0.5, 1.0 };
-	GLfloat matShininess2[] = { 256.0 };
-	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, matAmbient2);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, matDiffuse2);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular2);
-	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShininess2);
+	GLfloat matAmbient[] = { 0.8, 0.8, 0.8, 1.0 };
+	GLfloat matDiffuse[] = { 0.8, 0.8, 0.8, 1.0 };
+	GLfloat matSpecular[] = { 0.1, 0.1, 0.1, 0.1 };
+	GLfloat matShininess[] = {256.0 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, matAmbient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, matDiffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, matSpecular);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, matShininess);
 
-	glBindTexture(GL_TEXTURE_2D, 0); // Texture object ID == 0 means no texture mapping.
+	glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	glBindTexture(GL_TEXTURE_2D, paperTexObj);
 
 
 	glPushMatrix();
-	glTranslated(0.6, -0.9,  0);
+	glTranslated(0.5, -0.9,  -0.01);
 	glRotated(45.0, 0.0, 0.0, 1.0);
 	
 	// In +y direction.
 	glNormal3f(0.0, 1.0, 0.0); // Normal vector.
-	SubdivideAndDrawQuad(24, 2, 
+	SubdivideAndDrawQuad(1, 1, 
 		0.0, 0.0, x, -y, TABLETOP_Z + z,
 		1.0, 0.0, -x, -y, TABLETOP_Z + z,
 		1.0, 1.0, -x, -y, TABLETOP_Z,
 		0.0, 1.0, x, -y, TABLETOP_Z);
 	// In -y direction.
 	glNormal3f(0.0, -1.0, 0.0); // Normal vector.
-	SubdivideAndDrawQuad(24, 2, 
+	SubdivideAndDrawQuad(1, 1, 
 		0.0, 0.0, -x, y, TABLETOP_Z + z,
 		1.0, 0.0, x, y, TABLETOP_Z + z,
 		1.0, 1.0, x, y, TABLETOP_Z,
 		0.0, 1.0, -x, y, TABLETOP_Z);
 	// In +x direction.
 	glNormal3f(1.0, 0.0, 0.0); // Normal vector.
-	SubdivideAndDrawQuad(24, 2,
+	SubdivideAndDrawQuad(1, 1,
 		0.0, 0.0, x, -y, TABLETOP_Z,
 		1.0, 0.0, x, y, TABLETOP_Z,
 		1.0, 1.0, x, y, TABLETOP_Z + z,
@@ -1101,7 +1127,7 @@ void DrawCustomObject(void)
 
 	// In -x direction.
 	glNormal3f(-1.0, 0.0, 0.0); // Normal vector.
-	SubdivideAndDrawQuad(24, 2,
+	SubdivideAndDrawQuad(1, 1,
 		0.0, 0.0, -x, y, TABLETOP_Z,
 		1.0, 0.0, -x, -y, TABLETOP_Z,
 		1.0, 1.0, -x, -y, TABLETOP_Z + z,
