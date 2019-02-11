@@ -1088,7 +1088,7 @@ void DrawCustomObject(void)
 
 	GLfloat matAmbient[] = { 0.8, 0.8, 0.8, 1.0 };
 	GLfloat matDiffuse[] = { 0.8, 0.8, 0.8, 1.0 };
-	GLfloat matSpecular[] = { 0.1, 0.1, 0.1, 0.1 };
+	GLfloat matSpecular[] = { 0.3, 0.3, 0.3, 0.3 };
 	GLfloat matShininess[] = {256.0 };
 	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, matAmbient);
 	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, matDiffuse);
@@ -1103,46 +1103,40 @@ void DrawCustomObject(void)
 	glTranslated(0.5, -0.9,  -0.01);
 	glRotated(45.0, 0.0, 0.0, 1.0);
 	
-	// In +y direction.
-	glNormal3f(0.0, 1.0, 0.0); // Normal vector.
-	SubdivideAndDrawQuad(1, 1, 
-		0.0, 0.0, x, -y, TABLETOP_Z + z,
-		1.0, 0.0, -x, -y, TABLETOP_Z + z,
-		1.0, 1.0, -x, -y, TABLETOP_Z,
-		0.0, 1.0, x, -y, TABLETOP_Z);
-	// In -y direction.
-	glNormal3f(0.0, -1.0, 0.0); // Normal vector.
-	SubdivideAndDrawQuad(1, 1, 
-		0.0, 0.0, -x, y, TABLETOP_Z + z,
-		1.0, 0.0, x, y, TABLETOP_Z + z,
-		1.0, 1.0, x, y, TABLETOP_Z,
-		0.0, 1.0, -x, y, TABLETOP_Z);
-	// In +x direction.
-	glNormal3f(1.0, 0.0, 0.0); // Normal vector.
-	SubdivideAndDrawQuad(1, 1,
-		0.0, 0.0, x, -y, TABLETOP_Z,
-		1.0, 0.0, x, y, TABLETOP_Z,
-		1.0, 1.0, x, y, TABLETOP_Z + z,
-		0.0, 0.0, x, -y, TABLETOP_Z + z);
+	glBegin(GL_QUADS);				// start drawing the cube.
 
-	// In -x direction.
-	glNormal3f(-1.0, 0.0, 0.0); // Normal vector.
-	SubdivideAndDrawQuad(1, 1,
-		0.0, 0.0, -x, y, TABLETOP_Z,
-		1.0, 0.0, -x, -y, TABLETOP_Z,
-		1.0, 1.0, -x, -y, TABLETOP_Z + z,
-		0.0, 0.0, -x, y, TABLETOP_Z + z);
+	// Front Face
+	glTexCoord2f(0.0f, 0.0f); glVertex3f(x, -y, TABLETOP_Z);	// Bottom Left Of The Texture and Quad
+	glTexCoord2f(1.0f, 0.0f); glVertex3f(x, y, TABLETOP_Z);	// Bottom Right Of The Texture and Quad
+	glTexCoord2f(1.0f, 1.0f); glVertex3f(x, y, TABLETOP_Z + z);	// Top Right Of The Texture and Quad
+	glTexCoord2f(0.0f, 1.0f); glVertex3f(x, -y, TABLETOP_Z + z);	// Top Left Of The Texture and Quad
+
+	// Back Face
+	glTexCoord2f(0.0f, 0.0f); glVertex3f(-x, y, TABLETOP_Z);	// Bottom Left Of The Texture and Quad
+	glTexCoord2f(1.0f, 0.0f); glVertex3f(-x, -y, TABLETOP_Z);	// Bottom Right Of The Texture and Quad
+	glTexCoord2f(1.0f, 1.0f); glVertex3f(-x, -y, TABLETOP_Z + z);	// Top Right Of The Texture and Quad
+	glTexCoord2f(0.0f, 1.0f); glVertex3f(-x, y, TABLETOP_Z + z);	// Top Left Of The Texture and Quad
+
+	// Top Face
+	glTexCoord2f(0.0f, 0.0f); glVertex3f(x, -y, TABLETOP_Z + z);	// Bottom Left Of The Texture and Quad
+	glTexCoord2f(1.0f, 0.0f); glVertex3f(x, y, TABLETOP_Z + z);	// Bottom Right Of The Texture and Quad
+	glTexCoord2f(1.0f, 1.0f); glVertex3f(-x, y, TABLETOP_Z + z);	// Top Right Of The Texture and Quad
+	glTexCoord2f(0.0f, 1.0f); glVertex3f(-x, -y, TABLETOP_Z + z);	// Top Left Of The Texture and Quad
 
 
-	// Top.
+	// Right face
+	glTexCoord2f(0.0f, 0.0f); glVertex3f(x, -y, TABLETOP_Z + z);	// Bottom Left Of The Texture and Quad
+	glTexCoord2f(1.0f, 0.0f); glVertex3f(-x, -y, TABLETOP_Z + z);	// Bottom Right Of The Texture and Quad
+	glTexCoord2f(1.0f, 1.0f); glVertex3f(-x, -y, TABLETOP_Z);	// Top Right Of The Texture and Quad
+	glTexCoord2f(0.0f, 1.0f); glVertex3f(x, -y, TABLETOP_Z);	// Top Left Of The Texture and Quad
 
-	glNormal3f(0.0, 0.0, -1.0); // Normal vector.
-	SubdivideAndDrawQuad(24, 24, 
-		0.0, 1.0, x, -y, TABLETOP_Z + z,
-		1.0, 0.0, x, y, TABLETOP_Z + z,
-		1.0, 1.0, -x, y, TABLETOP_Z + z,
-		0.0, 0.0, -x, -y, TABLETOP_Z + z
-		);
+	// Left Face
+	glTexCoord2f(0.0f, 0.0f); glVertex3f(-x, y, TABLETOP_Z + z);	// Bottom Left Of The Texture and Quad
+	glTexCoord2f(1.0f, 0.0f); glVertex3f(x, y, TABLETOP_Z + z);	// Bottom Right Of The Texture and Quad
+	glTexCoord2f(1.0f, 1.0f); glVertex3f(x, y, TABLETOP_Z);	// Top Right Of The Texture and Quad
+	glTexCoord2f(0.0f, 1.0f); glVertex3f(-x, y, TABLETOP_Z);	// Top Left Of The Texture and Quad
+	glEnd();					// Done Drawing The Cube
+
 
 	glPopMatrix();
 
