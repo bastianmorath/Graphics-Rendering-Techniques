@@ -42,64 +42,27 @@ bool Sphere::hit( const Ray &r, double tmin, double tmax, SurfaceHitRecord &rec 
 	else {
 		double t_big = (-b + pow(discriminant, 0.5)) / (2 * a);
 		double t_small = (-b - pow(discriminant, 0.5)) / (2 * a);
-		double t;
 
-		// checking for the threshold, and to obtain the closest positive value of t
 		if (t_big < tmin && t_small < tmin) {
 			return false;
 		}
-		else if (t_big >= tmin && t_small <= tmin) {
-			t = t_big;
-		}
-		else if (t_big <= tmin && t_small >= tmin) {
-			t = t_small;
-		}
 		else {
-			t = min(t_big, t_small);
+			double t = t_small > 0 ? t_small : t_big;
+
+			if (t < tmin || t > tmax) {
+				return false;
+			}
+
+			rec.t = t;
+			rec.p = r.pointAtParam(t);
+			Vector3d normal = rec.p - center;
+			rec.normal = normal / normal.length();
+			rec.mat_ptr = matp;
+
+			return true;
 		}
-
-		//outside of threshold
-		if (t < tmin || t > tmax) {
-			return false;
-		}
-
-		rec.t = t;
-		rec.p = r.pointAtParam(t);
-		Vector3d temp = rec.p - center;
-		rec.normal = temp / temp.length();
-		rec.mat_ptr = matp;
-
-		return true;
-	}
-		/*
-		double t_small = (-b - sqrt(discriminant)) / 2 / a;
-		double t_big = (-b + sqrt(discriminant)) / 2 / a;
+}
 		
-		if (t_small <= tmin && t_big <= tmin) return false;
-
-		double t = t_small >= 0 ? t_small : t_big;
-		if (t_small >= tmin && t_big <= tmin) {
-			t = t_small;
-		}
-		else if (t_small <= tmin && t_big >= tmin) {
-			t = t_big;
-		}
-		else {
-			t = min(t_small, t_big);
-		}
-	}
-	if (tmax >= t && t >= tmin) {
-		rec.t = t;
-		rec.p = r.pointAtParam(t);
-		rec.mat_ptr = matp;
-		Vector3d normal = rec.p - center;
-		rec.normal = normal / normal.length();
-		return true;
-	}
-	else {
-		return false;
-	}
-	*/
 }
 
 
