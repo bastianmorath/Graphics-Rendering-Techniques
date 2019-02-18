@@ -43,9 +43,9 @@ using namespace std;
 // has same length as incoming vector L.
 //////////////////////////////////////////////////////////////////////////////
 
-static Vector3d mirrorReflect( const Vector3d &L, const Vector3d &N )
+static Vector3d mirrorReflect(const Vector3d &L, const Vector3d &N)
 {
-	return ( 2.0 * dot( N, L ) ) * N - L;
+	return (2.0 * dot(N, L)) * N - L;
 }
 
 
@@ -56,8 +56,8 @@ static Vector3d mirrorReflect( const Vector3d &L, const Vector3d &N )
 // Assume all vector L, N and V are unit vectors.
 //////////////////////////////////////////////////////////////////////////////
 
-static Color computePhongLighting( const Vector3d &L, const Vector3d &N, const Vector3d &V,
-								   const Material &mat, const PointLightSource &ptLight )
+static Color computePhongLighting(const Vector3d &L, const Vector3d &N, const Vector3d &V,
+	const Material &mat, const PointLightSource &ptLight)
 {
 	Vector3d R = mirrorReflect(L, N);
 
@@ -81,10 +81,10 @@ static Color computePhongLighting( const Vector3d &L, const Vector3d &N, const V
 // hasShadow: specifies whether to generate shadows.
 //////////////////////////////////////////////////////////////////////////////
 
-Color Raytrace::TraceRay( const Ray &ray, const Scene &scene, 
-					      int reflectLevels, bool hasShadow )
+Color Raytrace::TraceRay(const Ray &ray, const Scene &scene,
+	int reflectLevels, bool hasShadow)
 {
-	Ray uRay( ray );
+	Ray uRay(ray);
 	uRay.makeUnitDirection();  // Normalize ray direction.
 
 
@@ -95,12 +95,12 @@ Color Raytrace::TraceRay( const Ray &ray, const Scene &scene,
 	double nearest_t = DEFAULT_TMAX;
 	SurfaceHitRecord nearestHitRec;
 
-	for ( int i = 0; i < scene.numSurfaces; i++ )
+	for (int i = 0; i < scene.numSurfaces; i++)
 	{
 		SurfaceHitRecord tempHitRec;
-		bool hasHit = scene.surfacep[i]->hit( uRay, DEFAULT_TMIN, DEFAULT_TMAX, tempHitRec );
+		bool hasHit = scene.surfacep[i]->hit(uRay, DEFAULT_TMIN, DEFAULT_TMAX, tempHitRec);
 
-		if ( hasHit && tempHitRec.t < nearest_t )
+		if (hasHit && tempHitRec.t < nearest_t)
 		{
 			hasHitSomething = true;
 			nearest_t = tempHitRec.t;
@@ -108,51 +108,77 @@ Color Raytrace::TraceRay( const Ray &ray, const Scene &scene,
 		}
 	}
 
-	if ( !hasHitSomething ) return scene.backgroundColor;
+	if (!hasHitSomething) return scene.backgroundColor;
 
 	nearestHitRec.normal.makeUnitVector();
 	Vector3d N = nearestHitRec.normal;	// Unit vector.
 	Vector3d V = -uRay.direction();		// Unit vector.
 
-	Color result( 0.0f, 0.0f, 0.0f );	// The result will be accumulated here.
-
+	Color result(0.0f, 0.0f, 0.0f);	// The result will be accumulated here.
 
 	////////////////////////////////////
-	result = nearestHitRec.mat_ptr->k_d; // REMOVE THIS LINE AFTER YOU HAVE FINISHED CODE BELOW.
+	// result = nearestHitRec.mat_ptr->k_d; // REMOVE THIS LINE AFTER YOU HAVE FINISHED CODE BELOW.
 	////////////////////////////////////
 
 
 // Add to result the phong lighting contributed by each point light source.
 // Compute shadow if hasShadow is true.
 
-    //***********************************************
-    //*********** WRITE YOUR CODE HERE **************
-    //***********************************************
+	//***********************************************
+	//*********** WRITE YOUR CODE HERE **************
+	//***********************************************
 
 
+	for (int i = 0; i < scene.numPtLights; i++) {
+		PointLightSource p_light = scene.ptLight[i];
+		Vector3d L = (p_light.position - nearestHitRec.p).makeUnitVector();
+		double t_max = L.length();
 
+		bool has_intersected = false;
 
+		if (hasShadow) {
+			// If lightsource intersects any surface, then break out of this loop and go to next light source
+			for (int j = 0; j < scene.numSurfaces; j++) {
+				// Distance between light source and reflection point
+				if (scene.surfacep[j]->shadowHit(Ray(nearestHitRec.p, L), DEFAULT_TMIN, t_max)) {
+					// Shadow
+					has_intersected = true;
+					break;
+				}
+			}
+		}
 
-// Add to result the global ambient lighting.
+		if (!has_intersected) {
+			result += computePhongLighting(L, N, V, *nearestHitRec.mat_ptr, p_light);
+		}
+
+	}
+
+	
+
+	// Add to result the global ambient lighting.
 
 	//***********************************************
-    //*********** WRITE YOUR CODE HERE **************
-    //***********************************************
+	//*********** WRITE YOUR CODE HERE **************
+	//***********************************************
 
+	result += nearestHitRec.mat_ptr->k_a * scene.amLight.I_a;
 
+	if (reflectLevels == 0)
+		return result;
 
-
-
-// Add to result the reflection of the scene.
+	// Add to result the reflection of the scene.
 
 	//***********************************************
-    //*********** WRITE YOUR CODE HERE **************
-    //***********************************************
+	//*********** WRITE YOUR CODE HERE **************
+	//***********************************************
+	Ray reflected_ray = Ray(nearestHitRec.p, mirrorReflect(V, N));
+	result += nearestHitRec.mat_ptr->k_rg * TraceRay(reflected_ray, scene, reflectLevels--, hasShadow);
 
 
+	
 
-
-
+	
 
 	return result;
 }

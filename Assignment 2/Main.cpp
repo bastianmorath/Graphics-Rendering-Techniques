@@ -35,7 +35,7 @@ using namespace std;
 // Constants for Scene 1.
 static const int imageWidth1 = 640;
 static const int imageHeight1 = 480;
-static const int reflectLevels1 = 2;  // 0 -- object does not reflect scene.
+static const int reflectLevels1 = 0;  // 0 -- object does not reflect scene.
 static const int hasShadow1 = true;
 
 // Constants for Scene 2.

@@ -1,4 +1,3 @@
 ﻿cl : Command line warning D9035: option 'Gm' has been deprecated and will be removed in a future release
-  Sphere.cpp
-\\mac\home\documents\cs4247\assignment 2\sphere.cpp(66): warning C4715: 'Sphere::hit': not all control paths return a value
+  Raytrace.cpp
   assign2.vcxproj -> \\Mac\Home\Documents\CS4247\Assignment 2\Debug\assign2.exe
