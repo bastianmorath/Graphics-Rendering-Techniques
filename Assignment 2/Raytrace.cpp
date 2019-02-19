@@ -131,8 +131,9 @@ Color Raytrace::TraceRay(const Ray &ray, const Scene &scene,
 
 	for (int i = 0; i < scene.numPtLights; i++) {
 		PointLightSource p_light = scene.ptLight[i];
-		Vector3d L = (p_light.position - nearestHitRec.p).makeUnitVector();
-		double t_max = L.length();
+		Vector3d L = (p_light.position - nearestHitRec.p);
+		double distance_to_light = L.length();
+		L.makeUnitVector();
 
 		bool has_intersected = false;
 
@@ -140,7 +141,7 @@ Color Raytrace::TraceRay(const Ray &ray, const Scene &scene,
 			// If lightsource intersects any surface, then break out of this loop and go to next light source
 			for (int j = 0; j < scene.numSurfaces; j++) {
 				// Distance between light source and reflection point
-				if (scene.surfacep[j]->shadowHit(Ray(nearestHitRec.p, L), DEFAULT_TMIN, t_max)) {
+				if (scene.surfacep[j]->shadowHit(Ray(nearestHitRec.p, L), DEFAULT_TMIN, distance_to_light)) {
 					// Shadow
 					has_intersected = true;
 					break;
@@ -151,7 +152,6 @@ Color Raytrace::TraceRay(const Ray &ray, const Scene &scene,
 		if (!has_intersected) {
 			result += computePhongLighting(L, N, V, *nearestHitRec.mat_ptr, p_light);
 		}
-
 	}
 
 	
@@ -173,7 +173,7 @@ Color Raytrace::TraceRay(const Ray &ray, const Scene &scene,
 	//*********** WRITE YOUR CODE HERE **************
 	//***********************************************
 	Ray reflected_ray = Ray(nearestHitRec.p, mirrorReflect(V, N));
-	result += nearestHitRec.mat_ptr->k_rg * TraceRay(reflected_ray, scene, reflectLevels--, hasShadow);
+	result += nearestHitRec.mat_ptr->k_rg * TraceRay(reflected_ray, scene, --reflectLevels, hasShadow);
 
 
 	

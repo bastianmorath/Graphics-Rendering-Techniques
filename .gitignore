@@ -1,2 +1,9 @@
 
 *.opendb
+*.obj
+*.idb
+*.pdb
+*.ipch
+*.log
+*.ilk
+*.exe
