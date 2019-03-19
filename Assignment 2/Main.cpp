@@ -1,7 +1,7 @@
 //============================================================
-// STUDENT NAME: <your name>
-// MATRIC NO.  : <matric no.>
-// NUS EMAIL   : <your NUS email address>
+// STUDENT NAME: Bastian Morath
+// MATRIC NO.  : A0195628N
+// NUS EMAIL   : e0386231@u.nus.edu
 // COMMENTS TO GRADER:
 // <comments to grader, if any>
 //
@@ -28,15 +28,15 @@
 #include "Triangle.h"
 #include "Scene.h"
 #include "Raytrace.h"
-
+#include <vector>
 using namespace std;
 
 
 // Constants for Scene 1.
 static const int imageWidth1 = 640;
 static const int imageHeight1 = 480;
-static const int reflectLevels1 = 2;  // 0 -- object does not reflect scene.
-static const int hasShadow1 = false;
+static const int reflectLevels1 = 1;  // 0 -- object does not reflect scene.
+static const int hasShadow1 = true;
 
 // Constants for Scene 2.
 static const int imageWidth2 = 640;
@@ -115,16 +115,16 @@ int main()
 // Define Scene 1.
 
 	Scene scene1;
-	DefineScene1( scene1, imageWidth1, imageHeight1 );
+	// DefineScene1( scene1, imageWidth1, imageHeight1 );
 
 // Render Scene 1.
 
 	printf( "Render Scene 1...\n" );
-	RenderImage( "out1.png", scene1, reflectLevels1, hasShadow1 );
+	// RenderImage( "out1.png", scene1, reflectLevels1, hasShadow1 );
 	printf( "Image completed.\n" );
 
 
-/*
+
 // Define Scene 2.
 
 	Scene scene2;
@@ -135,7 +135,7 @@ int main()
 	printf( "Render Scene 2...\n" );
 	RenderImage( "out2.png", scene2, reflectLevels2, hasShadow2 );
 	printf( "Image completed.\n" );
-*/
+
 
 	printf( "All done.\n" );
 	return 0;
@@ -265,11 +265,132 @@ void DefineScene1( Scene &scene, int imageWidth, int imageHeight )
 // Modeling of Scene 2.
 ///////////////////////////////////////////////////////////////////////////
 
+void buildCube(float c_x, float c_y, float c_z, float height, float width, float length, Scene &scene, int counter)
+{
+	float x_near = c_x - length / 2;
+	float x_far = c_x + length / 2;
+	float y_near = c_y - height / 2;
+	float y_far = c_y + height / 2;
+	float z_near = c_z - width / 2;
+	float z_far = c_z + width / 2;
+	int material_i = 3;
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_near, y_far, z_far), Vector3d(x_far, y_far, z_far),
+		Vector3d(x_far, y_far, z_near), &(scene.material[material_i]));
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_near, y_far, z_far), Vector3d(x_far, y_far, z_near),
+		Vector3d(x_near, y_far, z_near), &(scene.material[material_i]));
+
+	// Cube +x face.
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_far, y_near, z_far), Vector3d(x_far, y_near, z_near),
+		Vector3d(x_far, y_far, z_near), &(scene.material[material_i]));
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_far, y_near, z_far), Vector3d(x_far, y_far, z_near),
+		Vector3d(x_far, y_far, z_far), &(scene.material[material_i]));
+
+	// Cube -x face.
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_near, y_near, z_far), Vector3d(x_near, y_near, z_near),
+		Vector3d(x_near, y_far, z_near), &(scene.material[material_i]));
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_near, y_near, z_far), Vector3d(x_near, y_far, z_near),
+		Vector3d(x_near, y_far, z_far), &(scene.material[material_i]));
+
+	// Cube +z face.
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_near, y_near, z_far), Vector3d(x_far, y_near, z_far),
+		Vector3d(x_far, y_far, z_far), &(scene.material[material_i]));
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_near, y_near, z_far), Vector3d(x_far, y_far, z_far),
+		Vector3d(x_near, y_far, z_far), &(scene.material[material_i]));
+
+	// Cube -z face.
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_near, y_near, z_near), Vector3d(x_far, y_near, z_near),
+		Vector3d(x_far, y_far, z_near), &(scene.material[material_i]));
+	scene.surfacep[counter++] = new Triangle(Vector3d(x_near, y_near, z_near), Vector3d(x_far, y_far, z_near),
+		Vector3d(x_near, y_far, z_near), &(scene.material[material_i]));
+
+}
+
+
 void DefineScene2( Scene &scene, int imageWidth, int imageHeight )
 {
-    //***********************************************
-    //*********** WRITE YOUR CODE HERE **************
-    //***********************************************
+	scene.backgroundColor = Color(0.2f, 0.3f, 0.5f);
 
+	scene.amLight.I_a = Color(1.0f, 1.0f, 1.0f) * 0.25f;
+
+	// Define materials.
+
+	scene.numMaterials = 5;
+	scene.material = new Material[scene.numMaterials];
+
+	// Light red.
+	scene.material[0].k_d = Color(0.88f, 0.48f, 0.375f);
+	scene.material[0].k_a = scene.material[0].k_d;
+	scene.material[0].k_r = Color(0.8f, 0.8f, 0.8f) / 1.5f;
+	scene.material[0].k_rg = Color(0.8f, 0.8f, 0.8f) / 3.0f;
+	scene.material[0].n = 64.0f;
+
+	// Light green.
+	scene.material[1].k_d = Color(0.25f, 0.7f, 0.63f);
+	scene.material[1].k_a = scene.material[0].k_d;
+	scene.material[1].k_r = Color(0.8f, 0.8f, 0.8f) / 1.5f;
+	scene.material[1].k_rg = Color(0.8f, 0.8f, 0.8f) / 3.0f;
+	scene.material[1].n = 64.0f;
+
+	// Light blue.
+	scene.material[2].k_d = Color(0.45f, 0.76f, 0.75f);
+	scene.material[2].k_a = scene.material[0].k_d;
+	scene.material[2].k_r = Color(0.8f, 0.8f, 0.8f) / 1.5f;
+	scene.material[2].k_rg = Color(0.8f, 0.8f, 0.8f) / 2.5f;
+	scene.material[2].n = 64.0f;
+
+	// Orange.
+	scene.material[3].k_d = Color(0.87f, 0.58f, 0.41f);
+	scene.material[3].k_a = scene.material[0].k_d;
+	scene.material[3].k_r = Color(0.8f, 0.8f, 0.8f) / 1.5f;
+	scene.material[3].k_rg = Color(0.8f, 0.8f, 0.8f) / 3.0f;
+	scene.material[3].n = 64.0f;
+
+	// Gray.
+	scene.material[4].k_d = Color(0.6f, 0.6f, 0.6f);
+	scene.material[4].k_a = scene.material[0].k_d;
+	scene.material[4].k_r = Color(0.6f, 0.6f, 0.6f);
+	scene.material[4].k_rg = Color(0.8f, 0.8f, 0.8f) / 3.0f;
+	scene.material[4].n = 128.0f;
+
+
+	// Define point light sources.
+
+	scene.numPtLights = 2;
+	scene.ptLight = new PointLightSource[scene.numPtLights];
+
+	scene.ptLight[0].I_source = Color(1.0f, 1.0f, 1.0f) * 0.6f;
+	scene.ptLight[0].position = Vector3d(150, 100, 150);
+
+	scene.ptLight[1].I_source = Color(1.0f, 1.0f, 1.0f) * 0.6f;
+	scene.ptLight[1].position = Vector3d(5.0, 80.0, 60.0);
+
+
+	// Define surface primitives.
+
+	scene.numSurfaces = 20;
+	scene.surfacep = new SurfacePtr[scene.numSurfaces];
+	int a = 0;
+	scene.surfacep[a++] = new Plane(0.0, 1.0, 0.0, 0.0, &(scene.material[1])); // Horizontal plane.
+	scene.surfacep[a++] = new Plane(1.0, 0.0, 0.0, 20.0, &(scene.material[1])); // Left vertical plane.
+	scene.surfacep[a++] = new Plane(0.0, 0.0, 1.0, 40, &(scene.material[1])); // Right vertical plane.
+
+	scene.surfacep[a++] = new Sphere(Vector3d(100, 7, 30), 10, &(scene.material[0])); // Small sphere.
+	scene.surfacep[a++] = new Sphere(Vector3d(50.0, 7, 60), 10, &(scene.material[0])); // Small sphere.
+	scene.surfacep[a++] = new Sphere(Vector3d(100, 7, 60), 10, &(scene.material[0])); // Small sphere.
+	scene.surfacep[a++] = new Sphere(Vector3d(50, 7, 30), 10, &(scene.material[0])); // Small sphere.
+	scene.surfacep[a++] = new Sphere(Vector3d(98, 50, 48), 16, &(scene.material[0])); // Head.
+	scene.surfacep[a++] = new Sphere(Vector3d(105, 61, 40), 4, &(scene.material[2])); // Eye.
+	scene.surfacep[a++] = new Sphere(Vector3d(105, 61, 56), 4, &(scene.material[2])); // Eye.
+
+	
+
+	buildCube(75, 25, 45, 20, 45, 65, scene, a); 
+
+	
+	// Define camera.
+
+	scene.camera = Camera(Vector3d(240, 150, 200), Vector3d(45.0, 22.0, 35), Vector3d(0.0, 1.0, 0.0),
+		(-1.0 * imageWidth) / imageHeight, (1.0 * imageWidth) / imageHeight, -1.0, 1.0, 3.0,
+		imageWidth, imageHeight);
 
 }

@@ -7,3 +7,7 @@
 *.log
 *.ilk
 *.exe
+*.idb
+*.obj
+*.tlog
+*.htm

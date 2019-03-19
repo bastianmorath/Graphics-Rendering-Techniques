@@ -1,7 +1,7 @@
 //============================================================
-// STUDENT NAME: <your name>
-// MATRIC NO.  : <matric no.>
-// NUS EMAIL   : <your NUS email address>
+// STUDENT NAME:  Bastian Morath
+// MATRIC NO.  : A0195628N
+// NUS EMAIL   : e0386231@u.nus.edu
 // COMMENTS TO GRADER:
 // <comments to grader, if any>
 //

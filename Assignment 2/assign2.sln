@@ -1,3 +1,4 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.329
@@ -6,19 +7,19 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "assign2", "assign2.vcxproj"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Win32 = Debug|Win32
-		Release|Win32 = Release|Win32
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FD755756-C5BC-4780-A58D-07ABC9E7A9AF}.Debug|Win32.ActiveCfg = Debug|Win32
-		{FD755756-C5BC-4780-A58D-07ABC9E7A9AF}.Debug|Win32.Build.0 = Debug|Win32
-		{FD755756-C5BC-4780-A58D-07ABC9E7A9AF}.Release|Win32.ActiveCfg = Release|Win32
-		{FD755756-C5BC-4780-A58D-07ABC9E7A9AF}.Release|Win32.Build.0 = Release|Win32
+		{FD755756-C5BC-4780-A58D-07ABC9E7A9AF}.Debug|x86.ActiveCfg = Debug|Win32
+		{FD755756-C5BC-4780-A58D-07ABC9E7A9AF}.Debug|x86.Build.0 = Debug|Win32
+		{FD755756-C5BC-4780-A58D-07ABC9E7A9AF}.Release|x86.ActiveCfg = Release|Win32
+		{FD755756-C5BC-4780-A58D-07ABC9E7A9AF}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {B4A5E146-4F3E-48BE-BDA2-DEC19BDE9F98}
+		SolutionGuid = {3AC774A6-EBC3-4773-837B-5DCCACE0C8B5}
 	EndGlobalSection
 EndGlobal
