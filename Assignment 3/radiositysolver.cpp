@@ -50,7 +50,7 @@ static const int maxIterations = 250;
  * TO TERMINATE THE RADIOSITY COMPUTATION.
  **********************************************************/
 
-
+float threshold = 0.5;
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -212,6 +212,16 @@ static void PreComputeTopFaceDeltaFormFactors( float deltaFormFactors[], int num
     /**********************************************************
      ****************** WRITE YOUR CODE HERE ******************
      **********************************************************/
+	float pixelLength = 2.0 / numPixelsOnWidth; // x and y delta for each pixel
+	float pixelArea = pow(pixelLength, 2);
+
+	for (int i = 0; i < numPixelsOnWidth; i++) { // We sweep from left to right, from bottom to top
+		for (int j = 0; j < numPixelsOnWidth; j++) {
+			float x = -1.0 + (i * pixelLength) - pixelLength / 2;
+			float y = -1.0 + (j * pixelLength) - pixelLength / 2;
+			deltaFormFactors[i * numPixelsOnWidth + j] = pixelArea / (M_PI * pow((pow(x, 2) + pow(y, 2) + 1.0), 2));
+		}
+	}
 }
 
 
@@ -225,6 +235,16 @@ static void PreComputeSideFaceDeltaFormFactors( float deltaFormFactors[], int nu
     /**********************************************************
      ****************** WRITE YOUR CODE HERE ******************
      **********************************************************/
+	float pixelLength = 2.0 / numPixelsOnWidth; // x and y delta for each pixel
+	float pixelArea = pow(pixelLength, 2);
+
+	for (int i = 0; i < numPixelsOnWidth; i++) { // We sweep from left to right, from bottom to top
+		for (int j = 0; j < numPixelsOnWidth / 2; j++) {
+			float y = -1.0 + (i * pixelLength) - pixelLength / 2;
+			float z = 0.0 + (j * pixelLength) - pixelLength / 2;
+			deltaFormFactors[j * numPixelsOnWidth + i] = pixelArea * z / (M_PI * pow((pow(y, 2) + pow(z, 2) + 1.0), 2));
+		}
+	}
 }
 
 
@@ -238,6 +258,31 @@ static void SetupHemicubeTopView( const QM_ShooterQuad *shooterQuad, float nearP
     /**********************************************************
      ****************** WRITE YOUR CODE HERE ******************
      **********************************************************/
+
+	// 1. Setup Viewport
+	glViewport(0, 0, winWidthHeight, winWidthHeight);
+
+	// 2. Projection Matrix
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(-nearPlane, nearPlane, -nearPlane, nearPlane, nearPlane, farPlane); // Since hemicube is 2x2, we are in a unit cube and 45 degree angles :)
+
+	// 3. ModelView Matrix
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	float lookAt[3] = {shooterQuad->centroid[0] + shooterQuad->normal[0],
+						shooterQuad->centroid[1] + shooterQuad->normal[1],
+						shooterQuad->centroid[2] + shooterQuad->normal[2] 
+						};
+	
+	float lookUp[3]; // Vector perpendicular to normal and some vector
+	VecDiff(lookUp, shooterQuad->v[0], shooterQuad->v[1]);
+	gluLookAt(shooterQuad->centroid[0], shooterQuad->centroid[1], shooterQuad->centroid[2],
+			  lookAt[0], lookAt[1], lookAt[2],
+			  lookUp[0], lookUp[1], lookUp[2]
+	);
+
+
 }
 
 
@@ -252,6 +297,40 @@ static void SetupHemicubeSideView( int face, const QM_ShooterQuad *shooterQuad, 
     /**********************************************************
      ****************** WRITE YOUR CODE HERE ******************
      **********************************************************/
+	 // 1. Setup Viewport
+	glViewport(0, 0, winWidthHeight, winWidthHeight / 2);
+
+	// 2. Projection Matrix
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glFrustum(-nearPlane, nearPlane, 0, nearPlane, nearPlane, farPlane); // Since hemicube is 2x2, we are in a unit cube and 45 degree angles :)
+
+	// 3. ModelView Matrix
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	float lookAt[3];
+	float diff[3];
+	VecDiff(diff, shooterQuad->v[0], shooterQuad->v[1]);
+
+	if (face == 0) {
+		VecDiff(lookAt, shooterQuad->v[0], shooterQuad->v[1]);
+	}
+	else if (face == 1){
+		
+		VecCrossProd(lookAt, shooterQuad->normal, diff);
+	}
+	else if (face == 2) {
+		VecCrossProd(lookAt, diff, shooterQuad->normal);
+	}
+	else {
+		VecDiff(lookAt, shooterQuad->v[1], shooterQuad->v[0]);
+	}
+
+
+	gluLookAt(shooterQuad->centroid[0], shooterQuad->centroid[1], shooterQuad->centroid[2],
+				lookAt[0], lookAt[1], lookAt[2],
+				shooterQuad->normal[0], shooterQuad->normal[1], shooterQuad->normal[2]
+	);
 }
 
 
@@ -264,11 +343,27 @@ static void UpdateRadiosities( const QM_Model *m, const float shotPower[3], cons
     for ( int i = 0; i < width * height; i++ )
     {
         int g = (int) RGBToUnsignedInt( &colorBuf[3 * i] );	// Which gatherer quad.
+		QM_GathererQuad *quad = m->gatherers[g];
         if ( g < 0 || g >= m->totalGatherers || g == backgroundColorInt ) continue;
 
         /**********************************************************
          ****************** WRITE YOUR CODE HERE ******************
          **********************************************************/
+		
+		// Formula: R_j * B_i * F_ij * A_i/A_j
+		// Do this for each RGB filter
+
+		float red =   quad->surface->reflectivity[0] * shotPower[0] * deltaFormFactors[i] / quad->area;
+		float green = quad->surface->reflectivity[1] * shotPower[1] * deltaFormFactors[i] / quad->area;
+		float blue =  quad->surface->reflectivity[2] * shotPower[2] * deltaFormFactors[i] / quad->area;
+
+		quad->radiosity[0] += red;
+		quad->radiosity[1] += green;
+		quad->radiosity[2] += blue;
+
+		quad->shooter->unshotPower[0] += red * quad->area;
+		quad->shooter->unshotPower[1] += green * quad->area;
+		quad->shooter->unshotPower[2] += blue * quad->area;
     }
 }
 
@@ -299,6 +394,10 @@ static void ComputeRadiosity( void )
          * ADD ADDITIONAL TERMINATING CONDITION TO TERMINATE
          * RADIOSITY COMPUTATION.
          **********************************************************/
+		//If s below threshold, then terminate
+		if (VecLen(unshotPower) < threshold) {
+			break;
+		}
 
         // After shooting power, the shooter quad's unshot power becomes zero.
         shooterQuad->unshotPower[0] = shooterQuad->unshotPower[1] = shooterQuad->unshotPower[2] = 0.0f;
