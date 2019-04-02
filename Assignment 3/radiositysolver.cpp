@@ -312,14 +312,14 @@ static void SetupHemicubeSideView( int face, const QM_ShooterQuad *shooterQuad, 
 	float diff[3];
 	VecDiff(diff, shooterQuad->v[0], shooterQuad->v[1]);
 
-	if (face == 0) {
+	if (face == 1) {
 		VecDiff(lookAt, shooterQuad->v[0], shooterQuad->v[1]);
 	}
-	else if (face == 1){
+	else if (face == 2){
 		
 		VecCrossProd(lookAt, shooterQuad->normal, diff);
 	}
-	else if (face == 2) {
+	else if (face == 3) {
 		VecCrossProd(lookAt, diff, shooterQuad->normal);
 	}
 	else {
@@ -328,7 +328,7 @@ static void SetupHemicubeSideView( int face, const QM_ShooterQuad *shooterQuad, 
 
 
 	gluLookAt(shooterQuad->centroid[0], shooterQuad->centroid[1], shooterQuad->centroid[2],
-				lookAt[0], lookAt[1], lookAt[2],
+			    shooterQuad->centroid[0] +  lookAt[0], shooterQuad->centroid[1] + lookAt[1], shooterQuad->centroid[2] + lookAt[2],
 				shooterQuad->normal[0], shooterQuad->normal[1], shooterQuad->normal[2]
 	);
 }
@@ -343,7 +343,6 @@ static void UpdateRadiosities( const QM_Model *m, const float shotPower[3], cons
     for ( int i = 0; i < width * height; i++ )
     {
         int g = (int) RGBToUnsignedInt( &colorBuf[3 * i] );	// Which gatherer quad.
-		QM_GathererQuad *quad = m->gatherers[g];
         if ( g < 0 || g >= m->totalGatherers || g == backgroundColorInt ) continue;
 
         /**********************************************************
@@ -353,17 +352,17 @@ static void UpdateRadiosities( const QM_Model *m, const float shotPower[3], cons
 		// Formula: R_j * B_i * F_ij * A_i/A_j
 		// Do this for each RGB filter
 
-		float red =   quad->surface->reflectivity[0] * shotPower[0] * deltaFormFactors[i] / quad->area;
-		float green = quad->surface->reflectivity[1] * shotPower[1] * deltaFormFactors[i] / quad->area;
-		float blue =  quad->surface->reflectivity[2] * shotPower[2] * deltaFormFactors[i] / quad->area;
+		float red = m->gatherers[g]->surface->reflectivity[0] * shotPower[0] * deltaFormFactors[i] / m->gatherers[g]->area;
+		float green = m->gatherers[g]->surface->reflectivity[1] * shotPower[1] * deltaFormFactors[i] / m->gatherers[g]->area;
+		float blue = m->gatherers[g]->surface->reflectivity[2] * shotPower[2] * deltaFormFactors[i] / m->gatherers[g]->area;
 
-		quad->radiosity[0] += red;
-		quad->radiosity[1] += green;
-		quad->radiosity[2] += blue;
+		m->gatherers[g]->radiosity[0] += red;
+		m->gatherers[g]->radiosity[1] += green;
+		m->gatherers[g]->radiosity[2] += blue;
 
-		quad->shooter->unshotPower[0] += red * quad->area;
-		quad->shooter->unshotPower[1] += green * quad->area;
-		quad->shooter->unshotPower[2] += blue * quad->area;
+		m->gatherers[g]->shooter->unshotPower[0] += red * m->gatherers[g]->area;
+		m->gatherers[g]->shooter->unshotPower[1] += green * m->gatherers[g]->area;
+		m->gatherers[g]->shooter->unshotPower[2] += blue * m->gatherers[g]->area;
     }
 }
 
