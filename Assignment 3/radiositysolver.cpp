@@ -27,7 +27,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // Input model filename.
-static const char inputModelFilename[] = "cornell_box.in";
+static const char inputModelFilename[] = "new_model.in";
 
 // Output model filename. This model contains the radiosity solution.
 static const char outputModelFilename[] = "cornell_box.out";

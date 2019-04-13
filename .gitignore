@@ -11,3 +11,7 @@
 *.obj
 *.tlog
 *.htm
+*.icloud
+*.db
+Assignment 3/.vs/assign3/v15/.suo
+.DS_Store
