@@ -3,10 +3,9 @@
  It generates a cube with a chequed pattern and a light-block in the middle
 '''
 
-text_file = open("new_model.txt", "w")
-
+text_file = open("new_model.in", "w")
 k = 10 # Number of faces per width. Min 6!
-l = 0.5
+l = 1.25
 
 
 # VERTICES

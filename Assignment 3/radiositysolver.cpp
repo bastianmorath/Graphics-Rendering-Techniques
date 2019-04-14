@@ -1,7 +1,7 @@
 //============================================================
-// STUDENT NAME: <your name>
-// MATRIC NO.  : <matric no.>
-// NUS EMAIL   : <your NUS email address>
+// STUDENT NAME: Bastian Morath
+// MATRIC NO.  : A0195628N
+// NUS EMAIL   : e0386231@u.nus.edu
 // COMMENTS TO GRADER:
 // <comments to grader, if any>
 //
@@ -27,7 +27,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 // Input model filename.
-static const char inputModelFilename[] = "new_model.in";
+static const char inputModelFilename[] = "cornell_box.in";
 
 // Output model filename. This model contains the radiosity solution.
 static const char outputModelFilename[] = "cornell_box.out";
@@ -40,7 +40,7 @@ static const float maxGathererQuadEdgeLength = 30.0f;
 
 // This value tells when to terminate the progressive refinement radiosity computation.
 // It sets the maximum number of iterations.
-static const int maxIterations = 250;
+static const int maxIterations = 350;
 
 
 /**********************************************************
